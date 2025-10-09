@@ -53,7 +53,7 @@ Reach out to your account team for these:
 ## 9. Before uploading scripts...
 
 > [!IMPORTANT]
-> Ensure you've adapted __BOTH__ of the scripts for your environment per step 1 of this guide.
+> Ensure you've adapted __BOTH__ of the scripts for your environment according to [__step 1__](#1-procure-the-required-scripts) of this guide.
 
 ## 10. Select detection-script.ps1 from file upload menu
 

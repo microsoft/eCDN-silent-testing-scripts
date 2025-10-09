@@ -76,7 +76,7 @@ When completed, you should have something that looks like this.
 
 ### 7. After targeted systems receive and process the Package deployment, the silent runners should be ready for headless testing via the [Microsoft eCDN Silent Testing dashboard](https://aka.ms/ecdn/admin/silent-tester)
 
-For more, refer to the [How to Perform a silent test](https://learn.microsoft.com/ecdn/how-to/perform-silent-test) documentation on Microsoft Learn.
-
 > [!NOTE]
 > If you wish to re-run the runner script, update test id within the script in the source folder, then update package distribution points. You can now deploy this package to a collection of machines.
+
+For more, refer to the [How to Perform a silent test](https://learn.microsoft.com/ecdn/how-to/perform-silent-test) documentation on Microsoft Learn.

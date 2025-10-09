@@ -5,12 +5,12 @@ Date: October 9th, 2025
 > [!CAUTION]
 > While this provisional update has passed limited testing, __we do not guarantee__ it will work in your environment or for your purposes. Use the provisional script at your own risk.
 
-## Change log - Detection script
+## Change log - [Detection script](./detection-script.ps1)
 
 - Modified to support a repeating schedule / frequency
 - Modified to report back to Intune the remediation script's output. Seen in the _Pre-_ and _Post-remediation detection output_ columns of the __Device status__ page.
 
-## Change log - Runner script
+## Change log - [Runner script](./silent-tester-runner-windows.ps1)
 
 - Improved logging resilience.
 - Improved timeout implementation to be date/time-based so it's unaffected by the machine going into sleep or hibernate.

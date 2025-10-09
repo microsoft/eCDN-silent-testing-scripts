@@ -40,13 +40,13 @@ Reach out to your account team for these:
 > [!NOTE]
 > Requires _Windows license verification_ found in __Tenant administration__ > __Connectors and tokens__ > __Windows data__.
 
-![Step 6 screenshot](./media/step06.png)
+![Step 6 screenshot](/media/intune-step06.png)
 
 ## 7. Give it a name such as "Deploy eCDN silent runner script"
 
 (Optional) Input a description as necessary
 
-![Step 7 screenshot](./media/step07.png)
+![Step 7 screenshot](/media/intune-step07.png)
 
 ## 8. Select Next
 
@@ -61,13 +61,13 @@ Reach out to your account team for these:
 
 (Please disregard the outdated content of the test scripts depicted in the screenshots.)
 
-![Step 11 screenshot](./media/step11.png)
+![Step 11 screenshot](/media/intune-step11.png)
 
 ## 12. Run the script using... 
 
 - the logged-on credentials, and
 - in 64-bit PowerShell
-![Step 12 screenshot](./media/step12.png)
+![Step 12 screenshot](/media/intune-step12.png)
 
 ## 13. Select Next
 
@@ -75,31 +75,31 @@ Reach out to your account team for these:
 
 No need to set a Scope tag.
 
-![Step 14 screenshot](./media/step14.png)
+![Step 14 screenshot](/media/intune-step14.png)
 
 ## 15. Select "+ Select groups to include"
 
-![Step 15 screenshot](./media/step15.png)
+![Step 15 screenshot](/media/intune-step15.png)
 
 ## 16. Select the target group(s)
 
 The computers (or user) contained in these groups will be executing the detection and mitigation scripts. Ie. launching the silent runner.
 
-![Step 16 screenshot](./media/step16.png)
+![Step 16 screenshot](/media/intune-step16.png)
 
 ## 17. Select the "Select" button
 
 ## 18. The group should now be displayed under "Assign to" heading
 
-![Step 18 screenshot](./media/step18.png)
+![Step 18 screenshot](/media/intune-step18.png)
 
 ## 19. Select "Daily" to modify the schedule
 
-![Step 19 screenshot](./media/step19.png)
+![Step 19 screenshot](/media/intune-step19.png)
 
 ## 20. Change the frequency to Hourly, from the pull-down menu.
 
-![Step 20 screenshot](./media/step20.png)
+![Step 20 screenshot](/media/intune-step20.png)
 
 ## 21. Select Apply
 
@@ -114,4 +114,4 @@ You're done. Within the next 24 hours the scripts should run and your _silent ru
 There are methods of triggering the script to run earlier (such as restarting the endpoints) which involve accessing the target machine(s) directly, but those methods are out of scope for this guide.
 
 > [!TIP]
-> If you have a need to instance silent runners on a cyclical, recurring basis, see the latest, provisional versions of the and _detection_ script in the [../provisional](../provisional/readme.md) folder.
+> If you have a need to instance silent runners on a cyclical, recurring basis, see the latest, provisional versions of the and _detection_ script in the [/provisional](../provisional/readme.md) folder.

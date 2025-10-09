@@ -37,7 +37,7 @@ Obtain a copy of the runner script and configure it for your tenant. This versio
 
 a.  On the __Package__ page, configure the __Name__ and __Source folder__. The *Source folder* should contain the *silent-tester-runner-windows.ps1* script. The other fields are optional.
 
-![A screenshot of a software package creation.](./media/package_wizard_-_1_start.png)
+![A screenshot of a software package creation.](/media/sccm-package_wizard_-_1_start.png)
 
 b.  On the __Program Type__ page, select the __Standard__ program type for computers.
 
@@ -52,7 +52,7 @@ c.  On the __Standard Program__ page, specify the following information.
 - __Run mode__: Can run with either user or administrative rights.\
        Also select the __Allow users to view and interact with the program installation__ checkbox.
 
-![A screenshot of a software package creation.](./media/package_wizard_-_2_standard_program.png)
+![A screenshot of a software package creation.](/media/sccm-package_wizard_-_2_standard_program.png)
 
 d.  On the __Requirements page__, proceed with defaults or configure per your environment.
 
@@ -60,13 +60,13 @@ d.  On the __Requirements page__, proceed with defaults or configure per your en
 
 e.  On the __Summary__ page, review and click *Next* to finish. Then click *Close* on the __Completion__ page.
 
-![A screenshot of a software package creation.](./media/package_wizard_-_3_summary.png)
+![A screenshot of a software package creation.](/media/sccm-package_wizard_-_3_summary.png)
 
 When completed, you should have something that looks like this.
 
-![A screenshot of a created package's General tab.](./media/completed_package_general.png)
+![A screenshot of a created package's General tab.](/media/sccm-completed_package_general.png)
 
-![A screenshot of a created package's Environment tab.](./media/completed_package_environment.png)
+![A screenshot of a created package's Environment tab.](/media/sccm-completed_package_environment.png)
 
 ### 4. Select the newly created Package and Distribute Content, proceed through the wizard as per customer environment
 

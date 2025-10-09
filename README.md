@@ -27,7 +27,7 @@ For more information on Silent Testing, see the [framework documentation](https:
 
 ## Legacy version
 
-For posterity, the non-modernized, legacy version of the script can be found [here](./original/README.md).
+For posterity, the non-modernized, legacy version of the script can be found [here](./original/readme.md).
 
 ## Contributing
 

@@ -1,14 +1,33 @@
-# Project
+# Microsoft eCDN Silent Testing Runner script
 
-> This repo has been populated by an initial template to help get you started. Please
-> make sure to update the content to build a great experience for community-building.
+This project contains the Microsoft eCDN Silent Runner script, modernized for improved flexibility, robustness, and compatibility with different environments.
 
-As the maintainer of this project, please make a few updates:
+- **Parameterization:** Allows more flexibility and reusability by passing arguments instead of hardcoding values.
+- **UEM Compatibility:** Introduced `UEM_Compatible_Mode` switch for better compatibility with UEM solutions like SCCM and Intune.
+- **Dynamic TestID:** For ease of use and repeated instancing via UEM solutions.
+- **Environment:** Parameter for use with government (GCC or GCCH) tenants.
+- **Validation:** Argument validation to ensure correct input formats and values.
+- **Improved Logging and Error Handling:** Enhanced error messages and logging for better troubleshooting.
+- **Watchdog Process:** Modified the watchdog process to include cache folder cleanup.
 
-- Improving this README.MD file to provide a great experience
-- Updating SUPPORT.MD with content about this project's support experience
-- Understanding the security reporting process in SECURITY.MD
-- Remove this section from the README
+> [!CAUTION]
+> Your experience in using Silent Testing depends on many factors, including the browser version and security policies that you are using. This version of the script has been thoroughly tested and proven to work but **we cannot guarantee** it will work in your environment. Use the tool at your own risk.
+
+## Summary
+
+The main change is with the addition of the `UEM_Compatible_Mode` switch which allows the script to exit after the silent runner (headless browser instance) is launched, relying on the child watchdog process to close the runner after the scenario duration time elapses.
+Without the switch, the script stays open for the duration of the scenario, possibly causing UEMs to time out and mis-report the script as having failed.
+
+The secondary main change is the addition of logging for the script itself, which is stored in your temp folder, in a file named `p5_script_{TestID}.txt` where **TestID** is the parameter value (for example `p5_script_Oct25Test01.txt`).
+
+> [!TIP]
+> For UEM deployment guidance, see the [**Intune** guidance](./intune/readme.md), and the [**SCCM** guidance](./sccm/readme.md).
+
+For more information on Silent Testing, see the [framework documentation](https://learn.microsoft.com/ecdn/technical-documentation/silent-testing-framework).
+
+## Legacy version
+
+For posterity, the non-modernized, legacy version of the script can be found [here](./original/README.md).
 
 ## Contributing
 

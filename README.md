@@ -13,6 +13,8 @@ This project contains the Microsoft eCDN Silent Runner script, modernized for im
 > [!CAUTION]
 > Your experience in using Silent Testing depends on many factors, including the browser version and security policies that you are using. This version of the script has been thoroughly tested and proven to work but **we cannot guarantee** it will work in your environment. Use the tool at your own risk.
 
+The modernized runner script can be found [here](./silent-tester-runner-windows.ps1).
+
 ## Summary
 
 The main change is with the addition of the `UEM_Compatible_Mode` switch which allows the script to exit after the silent runner (headless browser instance) is launched, relying on the child watchdog process to close the runner after the scenario duration time elapses.

@@ -1,6 +1,6 @@
 # Provisional Silent Test Runner script update
 
-Date: October 9th, 2025
+Date: November 12th, 2025
 
 > [!CAUTION]
 > While this provisional update has passed limited testing, __we do not guarantee__ it will work in your environment or for your purposes. Use the provisional script at your own risk.

@@ -57,7 +57,7 @@ $durationMinimum = 60
 $HeadlessRunner = -not $DirectRunner -and -not $OldHideMethod
 
 ### Parameter validation ###
-$RegexForTenantId = '[a-z0-9]{8}\-[a-z0-9]{4}\-[a-z0-9]{4}\-[a-z0-9]{4}\-[a-z0-9]{12}'
+$RegexForTenantId = '^[a-z0-9]{8}\-[a-z0-9]{4}\-[a-z0-9]{4}\-[a-z0-9]{4}\-[a-z0-9]{12}$'
 if ($TenantID -notmatch $RegexForTenantId) {
     Write-Error "Invalid Parameter: Tenant ID. Please provide a valid Tenant ID."
     Exit 1

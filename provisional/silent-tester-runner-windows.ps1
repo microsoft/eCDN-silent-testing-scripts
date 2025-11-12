@@ -26,7 +26,7 @@ param (
 #############
 
 ### Setting up the variables and function ###
-$ScriptVersion = "2.3.5.0"
+$ScriptVersion = "2.3.8.4"
 $durationMinimum = 10
 $HeadlessRunner = -not $DirectRunner -and -not $OldHideMethod
 $logPath = "$env:TEMP\p5_log_" + $TestID + ".txt"
@@ -48,21 +48,26 @@ $defaultPaths = @(
   "C:\Program Files\Google\Chrome\Application\chrome.exe")
 
 # Function to write output to the console or host, and log it to a file
-function Write-OutputOrHost {
+function Out-Log {
     param (
         [Parameter(Mandatory=$true)]
         [string]$Object,
         [ConsoleColor]$ForegroundColor = 'White'
     )
-    if ($UEM_Compatible_Mode) {
+    # Output message to console or host depending on UEM mode and message type
+    $firstWord = ($Object -split '\s+')[0].TrimEnd(':')
+    if ($firstWord -eq 'ERROR') {
+      Write-Error   ($Object = "$(Get-Date)  $Object")
+    }
+    elseif ($UEM_Compatible_Mode) {
         Write-Output $Object
     } else {
-        # Check the first word to determine the appropriate Write- command
-        $firstWord = ($Object -split '\s+')[0].TrimEnd(':')
-        switch ($firstWord.ToUpper()) {
-            'ERROR'   { Write-Error ($Object = "$(Get-Date)  $Object") }
-            'WARNING' { Write-Warning ($Object = "$(Get-Date)  $Object") }
-            default   { Write-Host $Object -ForegroundColor $ForegroundColor }
+      # Not UEM mode or Error message
+      if ($firstWord -eq 'WARNING') {
+        Write-Warning ($Object = "$(Get-Date)  $Object")
+      }
+      else {
+        Write-Host $Object -ForegroundColor $ForegroundColor
         }
     }
     # Attempt to log the output to the script log file, retrying up to 3 times on failure
@@ -83,47 +88,81 @@ if ($TestID -notmatch '^[a-zA-Z0-9_\-]+$') {
   Write-Error "Invalid Parameter: Test ID. Please provide a valid Test ID containing only alphanumeric characters, underscores, or hyphens."
   Exit 1
 }
-$RegexForTenantId = '[a-z0-9]{8}\-[a-z0-9]{4}\-[a-z0-9]{4}\-[a-z0-9]{4}\-[a-z0-9]{12}'
+$RegexForTenantId = '^[a-z0-9]{8}\-[a-z0-9]{4}\-[a-z0-9]{4}\-[a-z0-9]{4}\-[a-z0-9]{12}$'
 if ($TenantID -notmatch $RegexForTenantId) {
-  Write-OutputOrHost "ERROR: Invalid Parameter: Tenant ID '$TenantID'. Please provide a valid Tenant ID."
+  Out-Log "ERROR: Invalid Parameter: Tenant ID '$TenantID'. Please provide a valid Tenant ID."
   Exit 1
 }
 if ($ScenarioDuration -lt $durationMinimum) {
-  Write-OutputOrHost "ERROR: Invalid Parameter: Scenario Duration '$ScenarioDuration'. Please provide a Scenario Duration of greater than $durationMinimum seconds."
+  Out-Log "ERROR: Invalid Parameter: Scenario Duration '$ScenarioDuration'. Please provide a Scenario Duration of greater than $durationMinimum seconds."
   Exit 1
 }
 if ($CustomChromiumPath -and !(Test-Path $CustomChromiumPath)) {
-  Write-OutputOrHost "ERROR: Invalid Parameter: Custom Chromium Path '$CustomChromiumPath'. Please provide a valid path to the Chromium executable."
+  Out-Log "ERROR: Invalid Parameter: Custom Chromium Path '$CustomChromiumPath'. Please provide a valid path to the Chromium executable."
   Exit 1
 }
 
 ### Checking if the script is already running on this machine with the same TestID ###
 if ((Test-Path $logPath) -and (!$AllowMultipleRuns)) {
-  Write-OutputOrHost "ERROR: Test '$TestID' already ran on this machine. aborting"
-  Exit 0
+  Out-Log "ERROR: Test '$TestID' already ran on this machine. aborting"
+  Exit 2
 }
 
+# Function to check browser-specific policies
+function Test-BrowserPolicies {
+    param(
+        [string]$BrowserPath,
+        [bool]$IsHeadless
+    )
+    
+    $isEdge = $BrowserPath -match "msedge\.exe"
+    $isChrome = $BrowserPath -match "chrome\.exe"
+    
+    if ($isEdge) {
 $edgePoliciesPath = 'HKLM:\SOFTWARE\Policies\Microsoft\Edge'
+        
 # Check for Edge BrowserSignin policy that may block the runner
 $edgePolicy = Get-ItemProperty -Path $edgePoliciesPath -Name BrowserSignin -ErrorAction SilentlyContinue
 if ($null -ne $edgePolicy -and $edgePolicy.BrowserSignin -eq 2) {
-  Write-OutputOrHost "WARNING: Edge policy 'BrowserSignin' is set to 2 (ForceSignIn). The runner is likely to be blocked by this policy. You can use the -DirectRunner to verify this. If so, remove or change the 'BrowserSignin' policy. Using Chrome via the -PreferChrome parameter may be a usable workaround." -ForegroundColor Yellow
+            Out-Log "WARNING: Edge policy 'BrowserSignin' is set to 2 (ForceSignIn). The headless runner is likely to be blocked by this policy as it requires browser sign-in. You can use the -DirectRunner switch to verify this. If so, remove or change the 'BrowserSignin' policy. Using Chrome via the -PreferChrome switch may be a usable workaround." -ForegroundColor Yellow
 }
 
 # Check for Edge WebRtcLocalhostIpHandling policy that may hide local IPs
 $localIPsPolicy = Get-ItemProperty -Path $edgePoliciesPath -Name WebRtcLocalhostIpHandling -ErrorAction SilentlyContinue
 if ($localIPsPolicy.WebRtcLocalhostIpHandling -in @("default_public_interface_only", "disable_non_proxied_udp")) {
-    Write-OutputOrHost "WARNING: Local IPs may be inaccessible due to Edge policy 'WebRtcLocalhostIpHandling'. The runner may not function correctly. You can check the registry path 'HKLM:\SOFTWARE\Policies\Microsoft\Edge' to verify this. Remove or change the 'WebRtcLocalhostIpHandling' policy to 'default' or 'default_public_and_private_interfaces' to enable local IP access." -ForegroundColor Yellow
-    # Alternatively, you can bypass this policy by setting the policy to allow local IPs for specific URLs, but requires admin rights and a browser restart
-    # $jsonValue = '[{"handling":"default","url":"[*.]ecdn.teams.microsoft.com"},{"handling":"default","url":"https://teams.microsoft.com"},{"handling":"default","url":"https://teams.cloud.microsoft"},{"handling":"default","url":"[*.]ecdn.teams.cloud.microsoft"}]'
-    # Set-ItemProperty -Path $edgePoliciesPath -Name "WebRtcIPHandlingUrl" -Value $jsonValue -Force
+            Out-Log "WARNING: Local IPs may be inaccessible due to Edge policy 'WebRtcLocalhostIpHandling'. The runner may not function correctly. You can check the registry path '$edgePoliciesPath' to verify this. Remove or change the 'WebRtcLocalhostIpHandling' policy to 'default' or 'default_public_and_private_interfaces' to enable local IP access." -ForegroundColor Yellow
+            # Alternatively, you can use the WebRtcIPHandlingUrl policy to allow local IPs access for specific URLs. 
+            # For specific guidance, see https://learn.microsoft.com/ecdn/troubleshooting/troubleshoot-ecdn-performance-issues#webrtc-ip-handling-policy-blocking-peering
 }
 
 # Check for Edge HeadlessModeEnabled policy which is known to block silent runners
 $edgeHeadlessPolicy = Get-ItemProperty -Path $edgePoliciesPath -Name HeadlessModeEnabled -ErrorAction SilentlyContinue
-if ($null -ne $edgeHeadlessPolicy -and $edgeHeadlessPolicy.HeadlessModeEnabled -eq 0) {
-  Write-OutputOrHost "ERROR: Edge policy 'HeadlessModeEnabled' is set to 0 (Disabled). The silent (ie. headless) runner will be blocked by this policy and the process is expected to close immediately. You can check the registry path 'HKLM:\SOFTWARE\Policies\Microsoft\Edge' to verify this. Remove or change the 'HeadlessModeEnabled' policy to '1' to enable headless mode." -ForegroundColor Red
-  Exit 2
+        if ($IsHeadless -and $null -ne $edgeHeadlessPolicy -and $edgeHeadlessPolicy.HeadlessModeEnabled -eq 0) {
+            Out-Log "WARNING: Edge policy 'HeadlessModeEnabled' is set to 0 (Disabled). The silent (ie. headless) runner will be blocked by this policy and the process is expected to close immediately. You can check the registry path '$edgePoliciesPath' to verify this. Remove or change the 'HeadlessModeEnabled' policy to '1' to enable headless mode." -ForegroundColor Red
+        }
+    }
+    elseif ($isChrome) {
+        $chromePoliciesPath = 'HKLM:\SOFTWARE\Policies\Google\Chrome'
+        
+        # Check for Chrome BrowserSignin policy (equivalent to Edge's BrowserSignin)
+        $chromeBrowserSigninPolicy = Get-ItemProperty -Path $chromePoliciesPath -Name BrowserSignin -ErrorAction SilentlyContinue
+        if ($null -ne $chromeBrowserSigninPolicy -and $chromeBrowserSigninPolicy.BrowserSignin -eq 2) {
+            Out-Log "WARNING: Chrome policy 'BrowserSignin' is set to 2 (Forced). The headless runner is likely to be blocked by this policy as it requires browser sign-in. You can use the -DirectRunner switch to verify this. If so, remove or change the 'BrowserSignin' policy." -ForegroundColor Yellow
+        }
+
+        # Check for Chrome WebRtcIPHandling policy that may hide local IPs (equivalent to Edge's WebRtcLocalhostIpHandling)
+        $chromeWebRtcIPHandling = Get-ItemProperty -Path $chromePoliciesPath -Name WebRtcIPHandling -ErrorAction SilentlyContinue
+        if ($null -ne $chromeWebRtcIPHandling -and $chromeWebRtcIPHandling.WebRtcIPHandling -in @("default_public_interface_only", "disable_non_proxied_udp")) {
+            Out-Log "WARNING: Local IPs may be inaccessible due to Chrome policy 'WebRtcIPHandling'. The runner may not function correctly. You can check the registry path '$chromePoliciesPath' to verify this. Remove or change the 'WebRtcIPHandling' policy to 'default' or 'default_public_and_private_interfaces' to enable local IP access." -ForegroundColor Yellow
+            # Alternatively, you can use the WebRtcIPHandlingUrl policy to allow local IPs access for specific URLs.
+            # For specific guidance, see https://learn.microsoft.com/ecdn/troubleshooting/troubleshoot-ecdn-performance-issues#webrtc-ip-handling-policy-blocking-peering
+        }
+
+        # Note: Chrome doesn't have a direct equivalent to Edge's HeadlessModeEnabled policy
+    }
+    else {
+        Out-Log "INFO: Using custom Chromium executable. Browser-specific policy checks skipped." -ForegroundColor Gray
+    }
 }
 
 ### Old method: C# class to hide/show the browser window ###
@@ -149,9 +188,9 @@ if (-not $HeadlessRunner -and -not ("my.WinApi" -as [type])) {
 ###################
 ### MAIN SCRIPT ###
 ###################
-Write-OutputOrHost "Script version: $ScriptVersion"
-Write-OutputOrHost "Test ID: $TestID"
-Write-OutputOrHost "Adapter ID: $AdapterId"
+Out-Log "Script version: $ScriptVersion"
+Out-Log "Test ID: $TestID"
+Out-Log "Adapter ID: $AdapterId"
 
 ### Selecting the Chromium executable path ###
 if (!$CustomChromiumPath -or !(Test-Path $CustomChromiumPath)) {
@@ -182,15 +221,18 @@ if (!$CustomChromiumPath -or !(Test-Path $CustomChromiumPath)) {
   }
 
   if (!$CustomChromiumPath) {
-    Write-OutputOrHost "Could not find Edge or Chrome executable. Please set the `$CustomChromiumPath variable in the script to your Chromium browser's executable path."
-    Exit 2
+    Out-Log "ERROR: Could not find Edge or Chrome executable. Please set the `$CustomChromiumPath variable in the script to your Chromium browser's executable path."
+    Exit 4
   }
 
   if ($PreferChrome -and $CustomChromiumPath -notmatch "chrome\.exe") {
-    Write-OutputOrHost "Chrome not found" -ForegroundColor DarkGray
+    Out-Log "Chrome not found" -ForegroundColor DarkGray
   }
 }
-Write-OutputOrHost "Using Chromium at path '$CustomChromiumPath'"
+Out-Log "Using Chromium at path '$CustomChromiumPath'"
+
+### Check browser-specific policies ###
+Test-BrowserPolicies -BrowserPath $CustomChromiumPath -IsHeadless $HeadlessRunner
 
 ### Starting the browser process ###
 $browserArguments = @(
@@ -237,7 +279,7 @@ if ($HeadlessRunner) {
 }
 
 $Process = Start-Process $CustomChromiumPath -RedirectStandardOutput $logPath -RedirectStandardError $errLogPath -PassThru -ArgumentList ($browserArguments -join ' ') -WorkingDirectory $env:TEMP
-Write-OutputOrHost "$(($startedAt=Get-Date))  Started Chromium $($Process.Name) process, with id: $($Process.id)"
+Out-Log "$(($startedAt=Get-Date))  Started Chromium $($Process.Name) process, with id: $($Process.id)"
 # Swapping old window hide method with the --headless flag, as it doesn't work with the headless flag and will just indefinitely loop while it waits for the window to get a WindowHandle assigned.  Which it won't since it's headless.
 if ($OldHideMethod -and -not $DirectRunner -and [System.Security.Principal.WindowsIdentity]::GetCurrent().Name -ne "NT AUTHORITY\SYSTEM") {
   While ($Process.MainWindowHandle -eq 0 -and ($elapsed=(Get-Date) - $startedAt).TotalSeconds -lt 3) { Start-Sleep -m 100 }
@@ -265,15 +307,16 @@ Log-WatchdogMessage \"Started. Monitoring chromium process with PID: $chromePid 
 `$endTime = `$startTime.AddSeconds($extraTimeout)
 
 while ((`$now = Get-Date) -lt `$endTime) {
-  `$total = [math]::Round((`$endTime - `$startTime).TotalSeconds)
-  `$elapsed = [math]::Round((`$now - `$startTime).TotalSeconds)
-  `$percent = if (`$total -gt 0) { [math]::Min([math]::Round((`$elapsed / `$total) * 100), 100) } else { 100 }
-  Write-Progress -Activity \"Watchdog Monitoring\" -Status \"Elapsed: `$elapsed sec / `$total sec\" -PercentComplete `$percent
+  `$totalSeconds = [math]::Round((`$endTime - `$startTime).TotalSeconds)
+  `$elapsedSeconds = [math]::Round((`$now - `$startTime).TotalSeconds)
+  `$percentCompleted = if (`$totalSeconds -gt 0) { [math]::Min([math]::Round((`$elapsedSeconds / `$totalSeconds) * 100), 100) } else { 100 }
+  Write-Progress -Activity \"Watchdog Monitoring\" -Status \"Elapsed: `$elapsedSeconds sec / `$totalSeconds sec\" -PercentComplete `$percentCompleted
   Start-Sleep -Seconds 1
 
   if (-not (Get-Process -Id $chromePid -ErrorAction SilentlyContinue)) {
   `$secondsEarly = [math]::Round((`$endTime - `$now).TotalSeconds) - $timeoutBonus
-  Log-WatchdogMessage \"Process $chromePid not found. Appears to have been ended prematurely (`$secondsEarly seconds early)\"
+  `$endingNuance = if (`$elapsedSeconds -lt $durationMinimum) { \"not found\" } else { \"no longer running\" }
+  Log-WatchdogMessage \"Process $chromePid `$endingNuance. Appears to have been ended prematurely (`$secondsEarly seconds early)\"
     `$endedPrematurely = `$true
     break
   }
@@ -307,6 +350,7 @@ try {
 }
 
 Log-WatchdogMessage \"Exiting\"
+Start-Sleep -Seconds 5
 "@
 
 $watchdogProcess = Start-Process powershell -WindowStyle Hidden -ArgumentList "-NoProfile", "-Command", $watchdogScript -PassThru
@@ -403,14 +447,18 @@ if ($PassThru) {
   Write-Verbose "Added new runner with ID $($Process.Id) to the global eCDNRunners list"
 
   if (-not $UEM_Compatible_Mode) {
-    Write-OutputOrHost "WARNING: The -PassThru switch enables UEM_Compatible_Mode, relying solely on the watchdog process (ID $($watchdogProcess.Id)) to terminate the runner process."
+    Out-Log "WARNING: The -PassThru switch enables UEM_Compatible_Mode, relying solely on the watchdog process (ID $($watchdogProcess.Id)) to terminate the runner process."
   }
   return $Process
 }
 
 if ($UEM_Compatible_Mode) {
-  Write-OutputOrHost ((' '*21) + "Scheduled to end at $((Get-Date).AddSeconds($ScenarioDuration)) (in $ScenarioDuration seconds)")
+  Out-Log ((' '*21) + "Scheduled to end at $((Get-Date).AddSeconds($ScenarioDuration)) (in $ScenarioDuration seconds)")
   Start-Sleep -Seconds 5
+  if ($Process.HasExited) {
+    Out-Log "ERROR: The silent runner in UEM Compatible Mode has exited unexpectedly early." -ForegroundColor Red
+    Exit 5
+  }
   return
 }
 
@@ -424,7 +472,7 @@ $endTime = (Get-Date).AddSeconds($ScenarioDuration)
 while (($now = Get-Date) -lt $endTime) {
 if ($Process.HasExited) {
     $secondsEarly = [math]::Round(($endTime - $now).TotalSeconds)
-    Write-OutputOrHost "$now  Chromium process with ID $($Process.Id) was terminated (about $secondsEarly sec) prematurely by an outside process."
+    Out-Log "$now  Chromium process with ID $($Process.Id) was terminated (about $secondsEarly sec) prematurely by an outside process."
     break
   }
   Start-Sleep -Seconds 2
@@ -433,9 +481,9 @@ if ($Process.HasExited) {
 if (!$Process.HasExited) {
   try {
     $stopProcessInfo = Stop-Process -InputObject $Process -Force -PassThru -ErrorAction Stop
-    Write-OutputOrHost "$(Get-Date)  Stopped Chromium process"
+    Out-Log "$(Get-Date)  Stopped Chromium process"
   } catch {
-    Write-OutputOrHost "ERROR: Failed to stop the Chromium process with ID $($Process.Id). Error: $_"
+    Out-Log "ERROR: Failed to stop the Chromium process with ID $($Process.Id). Error: $_"
   }
 }
 # End watchdog process if the process is still running
@@ -444,7 +492,7 @@ if ($watchdogProcess -and !$watchdogProcess.HasExited) {
       Stop-Process -InputObject $watchdogProcess -Force
       Write-Verbose "            Stopped watchdog process"
     } catch {
-      Write-OutputOrHost "ERROR: Failed to stop the watchdog process with ID $($watchdogProcess.Id). Error: $_"
+      Out-Log "ERROR: Failed to stop the watchdog process with ID $($watchdogProcess.Id). Error: $_"
     } 
 }
 else {
@@ -459,5 +507,5 @@ if (Test-Path $preferencesFilePath) {
 }
 if (Test-Path $cacheFolderPath) {
   Remove-Item -Path $cacheFolderPath -Recurse -Force -ErrorAction SilentlyContinue
-  Write-OutputOrHost "$(Get-Date)  Cleaned up cache folder '$cacheFolderPath'"
+  Out-Log "$(Get-Date)  Cleaned up cache folder '$cacheFolderPath'"
 }

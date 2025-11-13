@@ -9,7 +9,7 @@ Date: November 12th, 2025
 
 - Added enhanced configuration guidance.
 - Added support a repeating schedule / frequency.
-- Modified to report back to Intune the remediation script's output. Seen in the _Pre-_ and _Post-remediation detection output_ columns of the __Device status__ page.
+- Modified to report back to Intune the remediation script's output. Seen in the _Pre-_, _Post-remediation detection output_ and _Remediation error_ columns of the __Device status__ page.
 - Modified to report back to Intune, upon compliance detected, the latest remediation script's output.
 - Improved output formatting using `|` as a delimiter for easy of parsing.
 

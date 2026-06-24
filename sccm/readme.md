@@ -19,10 +19,13 @@ To provide guidance on how to facilitate Microsoft eCDN's Silent Testing feature
 
 ## Preparation: Configure your runner script
 
-Obtain a copy of the runner script and configure it for your tenant. This version of [*silent-tester-runner-windows.ps1* script](./silent-tester-runner-windows.ps1) has been validated to work with the SCCM guidance provided below.
+Obtain a copy of the runner script and configure it for your tenant. We recommend the newer [*silent-tester-runner-windows.ps1* script](../silent-tester-runner-windows.ps1) in the root folder, which offers improved logging and GCC/GCCH support. If you prefer the exact version that Microsoft used to validate and complete this guide, use [this version of the *silent-tester-runner-windows.ps1* script](./silent-tester-runner-windows.ps1) instead — it is the one we confirmed to work with the SCCM guidance below.
 
 > [!IMPORTANT]
 > When executing, the tenant id must be provided.  It's best practice to hard-code your tenant id as the default value of the `$TenantID` parameter.
+
+> [!NOTE]
+> **GCC/GCCH tenants** should use the newer root script, as it includes the `-Environment` parameter required to connect to the appropriate government cloud endpoints.
 
 ## Creating the [Configuration Manager package](https://learn.microsoft.com/mem/configmgr/apps/deploy-use/packages-and-programs) for Silent Runner
 

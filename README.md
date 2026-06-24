@@ -9,6 +9,23 @@ This project contains the Microsoft eCDN Silent Runner script, modernized for im
 - **Validation:** Argument validation to ensure correct input formats and values.
 - **Improved Logging and Error Handling:** Enhanced error messages and logging for better troubleshooting.
 - **Watchdog Process:** Modified the watchdog process to include cache folder cleanup.
+- **Browser Policy Detection:** Detects and warns about policies (`BrowserSignin`, `HeadlessModeEnabled`, `WebRtcIPHandling`) that may prevent the runner from operating correctly.
+
+## Quick examples
+
+```powershell
+# Basic usage
+.\silent-tester-runner-windows.ps1 -TenantID "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+# GCC/GCCH tenant
+.\silent-tester-runner-windows.ps1 -TenantID "..." -Environment GCCH
+
+# UEM deployment (SCCM/Intune)
+.\silent-tester-runner-windows.ps1 -TenantID "..." -SCCM
+
+# Custom duration (8 hours)
+.\silent-tester-runner-windows.ps1 -TenantID "..." -Seconds 28800
+```
 
 > [!CAUTION]
 > Your experience in using Silent Testing depends on many factors, including the browser version and security policies that you are using. This version of the script has been thoroughly tested and proven to work but **we cannot guarantee** it will work in your environment. Use the tool at your own risk.
@@ -27,9 +44,12 @@ The secondary main change is the addition of logging for the script itself, whic
 
 For more information on Silent Testing, see the [framework documentation](https://learn.microsoft.com/ecdn/technical-documentation/silent-testing-framework).
 
-## Legacy version
+## Legacy versions
 
-For posterity, the non-modernized, legacy version of the script can be found [here](./original/readme.md).
+For posterity, older versions of the script are archived below:
+
+- [v2.2.17.0](./archive/silent-tester-runner-windows-v2.2.17.0.ps1) — the previous modernized version.
+- [Original (legacy headless)](./archive/original/readme.md) — the non-modernized, legacy version.
 
 ## Contributing
 

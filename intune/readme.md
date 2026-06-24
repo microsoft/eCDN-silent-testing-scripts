@@ -12,7 +12,7 @@ Below is validated guidance on how to deploy Microsoft eCDN Silent Runners using
 
 ## 1. Procure the required scripts
 
-Reach out to your account team for these:
+Download these two scripts:
 
 - [_UEM compatible silent-tester-runner-windows.ps1_](/silent-tester-runner-windows.ps1) script
 - [_detection-script.ps1_](./detection-script.ps1) script
@@ -114,4 +114,4 @@ You're done. Within the next 24 hours the scripts should run and your _silent ru
 There are methods of triggering the script to run earlier (such as restarting the endpoints) which involve accessing the target machine(s) directly, but those methods are out of scope for this guide.
 
 > [!TIP]
-> If you have a need to instance silent runners on a cyclical, recurring basis, see the latest, provisional versions of the and _detection_ script in the [/provisional](../provisional/readme.md) folder.
+> The detection script included in this guide supports cyclical, recurring runner deployments. See the inline configuration guidance in [detection-script.ps1](./detection-script.ps1) for schedule and frequency options.

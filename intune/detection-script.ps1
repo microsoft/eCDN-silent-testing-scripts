@@ -1,6 +1,10 @@
 # Intune Detection Script for Silent Test Runner Log Monitoring
 # Version: 2.3.0
 # 
+# Configuration mode:
+#   - For one-off tests, use a static TestIdPattern (e.g., "MyFirstTest")
+#   - For recurring/automated deployments, use the dynamic time-based pattern below.
+#
 # This script monitors the TEMP directory for silent test runner log files matching a time-based pattern.
 # It searches for log files with the pattern "p5_script_runner_YYYYMMDD_HH*.txt" from the current hour.
 # 

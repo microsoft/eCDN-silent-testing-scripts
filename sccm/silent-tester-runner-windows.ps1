@@ -10,6 +10,7 @@ param (
     [switch] $AllowMultipleRuns, # Use if you want to be able to run more the once with the same $TestID on the machine. 2 tabs might jump to user.
     [Alias ("Chrome")]
     [switch] $PreferChrome,
+    [Alias ("CustomChromePath")]
     [string] $CustomChromiumPath = "", # Use if you want to specify the path to the Chromium executable.
     [Alias ("ShowRunner","DontHideRunner")]
     [switch] $DirectRunner, # Use if you want to run the Chromium process in a visible window. This is useful for debugging purposes.

@@ -32,17 +32,35 @@ This project contains the Microsoft eCDN Silent Runner script, modernized for im
 
 The modernized runner script can be found [here](./silent-tester-runner-windows.ps1).
 
-## Summary
+## How it works
 
-The main change is with the addition of the `UEM_Compatible_Mode` switch which allows the script to exit after the silent runner (headless browser instance) is launched, relying on the child watchdog process to close the runner after the scenario duration time elapses.
-Without the switch, the script stays open for the duration of the scenario, possibly causing UEMs to time out and mis-report the script as having failed.
+When executed, the script launches a headless Chromium browser (Microsoft Edge or Google Chrome) that connects to the Microsoft eCDN Silent Testing framework. A watchdog process monitors the browser and terminates it after the scenario duration elapses, cleaning up the cache folder afterward.
 
-The secondary main change is the addition of logging for the script itself, which is stored in your temp folder, in a file named `p5_script_{TestID}.txt` where **TestID** is the parameter value (for example `p5_script_Oct25Test01.txt`).
+When using `-UEM_Compatible_Mode`, the script exits immediately after launching the browser, allowing UEM solutions like SCCM and Intune to report success without waiting for the full duration. The watchdog process handles cleanup independently.
+
+The script logs its activity to your temp folder in a file named `p5_script_{TestID}.txt` (for example `p5_script_runner_20260629_153000.txt`).
 
 > [!TIP]
 > For UEM deployment guidance, see the [**Intune** guidance](./intune/readme.md), and the [**SCCM** guidance](./sccm/readme.md).
 
 For more information on Silent Testing, see the [framework documentation](https://learn.microsoft.com/ecdn/technical-documentation/silent-testing-framework).
+
+## Parameters
+
+| Parameter | Aliases | Default | Description |
+|-----------|---------|---------|-------------|
+| `-TenantID` | — | `TENANT_ID` | **Required.** Your Microsoft tenant ID (GUID format). |
+| `-TestID` | — | Dynamic timestamp | Unique identifier for this test run. Used in log file names. |
+| `-ScenarioDuration` | `-Seconds` | `85500` (23.75 hrs) | How long the runner stays active, in seconds. |
+| `-UEM_Compatible_Mode` | `-SCCM`, `-Intune` | Off | Allows the script to exit after launch, relying on the watchdog to close the runner. Use for SCCM/Intune deployments. |
+| `-AllowMultipleRuns` | `-Force` | Off | Permits re-running with the same TestID on the same machine. |
+| `-PreferChrome` | `-Chrome` | Off | Prefers Google Chrome over Microsoft Edge. |
+| `-CustomChromiumPath` | `-CustomChromePath` | Auto-detected | Path to a Chromium-based browser executable. |
+| `-DirectRunner` | `-ShowRunner`, `-DontHideRunner` | Off | Runs the browser in a visible window (useful for debugging). |
+| `-AdapterId` | — | `PowerShell` or `Direct` | Identifier shown in the Silent Testing dashboard. |
+| `-PassThru` | `-ReturnRunner` | Off | Returns the process object for programmatic control. |
+| `-Environment` | `-Env` | `General` | Set to `GCC` or `GCCH` for government cloud tenants. |
+| `-OldHideMethod` | — | Off | Uses the legacy C# window-hiding method instead of `--headless`. |
 
 ## Legacy versions
 

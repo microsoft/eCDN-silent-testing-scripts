@@ -19,15 +19,34 @@ Download these two scripts:
 
 ## 2. Prepare both script templates by adapting them for your environment
 
-1. In the _silent-tester-runner-windows.ps1_ script, ensure you set...
+### Runner script (_silent-tester-runner-windows.ps1_)
 
-    - your Tenant's ID as the value for __$TenantID__
-    - a new Test ID string as the value for __$TestID__
-    - a runner Time-To-Live (in seconds) of your choice, as the value for __$ScenarioDuration__
-    - the __$UEM\_Compatible\_Mode__ parameter to __$true__  
-    See [silent testing framework documentation](https://learn.microsoft.com/ecdn/technical-documentation/silent-testing-framework#run-instructions-for-windows-environment) for more information on these variables.
+Set these values:
 
-2. In the _detection-script.ps1_, ensure that the value for __$TestID__ matches the value set in the runner script.
+- __$TenantID__ — your Microsoft tenant ID (required)
+- __$UEM\_Compatible\_Mode__ — set to __$true__ (required for Intune)
+- __$ScenarioDuration__ — runner time-to-live in seconds (default: 85,500 / ~23.75 hours)
+
+See [silent testing framework documentation](https://learn.microsoft.com/ecdn/technical-documentation/silent-testing-framework#run-instructions-for-windows-environment) for more information on these parameters.
+
+### Detection script (_detection-script.ps1_)
+
+The detection script determines whether Intune should trigger a new runner. It works by checking for the presence of a runner log file — if no log is found, remediation (the runner script) is triggered.
+
+There are two approaches depending on your needs:
+
+#### Option A: One-off / Getting started (static TestID)
+
+Best for first-time testing or one-off deployments. Set a static `$TestID` in both scripts (e.g., `$TestID = "June2026Test"`). The detection script will find the log file after the first run and won't re-trigger. When you want to run again, update the TestID in both scripts.
+
+#### Option B: Recurring / Automated (dynamic TestID) — Recommended
+
+Best for ongoing, cyclical deployments. Leave the runner script's `$TestID` at its default (dynamic timestamp). The detection script uses a time-based pattern to check whether a runner has been active within the current period. If not, it triggers a new one.
+
+With the default configuration, one runner is instanced roughly once every 24 hours per machine — avoiding both multiple concurrent runners and extended time gaps without coverage.
+
+> [!TIP]
+> See the configuration guidance in [detection-script.ps1](./detection-script.ps1) comments for tuning the relationship between `$TestIdPattern`, `$ScenarioDuration`, and the Intune remediation schedule frequency.
 
 ## 3. Once your scripts are adapted, go to [intune.microsoft.com](https://intune.microsoft.com/#home)
 
@@ -53,7 +72,7 @@ Download these two scripts:
 ## 9. Before uploading scripts...
 
 > [!IMPORTANT]
-> Ensure you've adapted __BOTH__ of the scripts for your environment according to [__step 1__](#1-procure-the-required-scripts) of this guide.
+> Ensure you've adapted __BOTH__ of the scripts for your environment according to [__step 2__](#2-prepare-both-script-templates-by-adapting-them-for-your-environment) of this guide.
 
 ## 10. Select detection-script.ps1 from file upload menu
 

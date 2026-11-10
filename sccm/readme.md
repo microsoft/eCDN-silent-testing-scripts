@@ -25,6 +25,9 @@ Obtain a copy of the runner script and configure it for your tenant. We recommen
 > When executing, the tenant id must be provided.  It's best practice to hard-code your tenant id as the default value of the `$TenantID` parameter.
 
 > [!NOTE]
+> If you use a runner key from the Microsoft eCDN admin portal (__Silent Testing__ > __Runner keys__), hard-code it as the default value of the `$RunnerKey` parameter, or append `-RunnerKey <key>` to the command line below. Treat it as a secret.
+
+> [!NOTE]
 > **GCC/GCCH tenants** should use the newer root script, as it includes the `-Environment` parameter required to connect to the appropriate government cloud endpoints.
 
 ## Creating the [Configuration Manager package](https://learn.microsoft.com/mem/configmgr/apps/deploy-use/packages-and-programs) for Silent Runner

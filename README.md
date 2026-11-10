@@ -25,6 +25,9 @@ This project contains the Microsoft eCDN Silent Runner script, modernized for im
 
 # Custom duration (8 hours)
 .\silent-tester-runner-windows.ps1 -TenantID "..." -Seconds 28800
+
+# With a runner key from the Microsoft eCDN admin portal
+.\silent-tester-runner-windows.ps1 -TenantID "..." -RunnerKey "..."
 ```
 
 > [!CAUTION]
@@ -61,6 +64,7 @@ For more information on Silent Testing, see the [framework documentation](https:
 | `-PassThru` | `-ReturnRunner` | Off | Returns the process object for programmatic control. |
 | `-Environment` | `-Env` | `General` | Set to `GCC` or `GCCH` for government cloud tenants. |
 | `-OldHideMethod` | — | Off | Uses the legacy C# window-hiding method instead of `--headless`. |
+| `-RunnerKey` | — | None | Optional. Your tenant's runner key from the Microsoft eCDN admin portal (**Silent Testing** > **Runner keys**). Treat it as a secret; the script never writes it to the logs. |
 
 ## Legacy versions
 

@@ -15,19 +15,20 @@ param (
   [Alias ("ShowRunner","DontHideRunner")]
   [switch] $DirectRunner, # Use if you want to run the Chromium process in a visible window. This is useful for debugging purposes.
   [string] $AdapterId, # Ensure the string is URL encoded, as it will be used in the URL. Default is PowerShell, or Direct if -DirectRunner switch is used. For troubleshooting, can use this dynamic, default value ="$(hostname)-$(Get-Date -Format "HHmm")"
-  [Alias ("ReturnRunner")]
+  [Alias ("ReturnRunner", "R")]
   [switch] $PassThru, # Returns the process object of the Chromium process.
   [ValidateSet("General", "GCC", "GCCH")]
   [Alias ("Env")]
   [string] $Environment = "General", # Specify the environment: General, GCC, or GCCH.
-  [switch] $OldHideMethod # Use if you want to use the old method of hiding the Chromium window using a C# class. This is not compatible with the --headless flag.
+  [switch] $OldHideMethod, # Use if you want to use the old method of hiding the Chromium window using a C# class. This is not compatible with the --headless flag.
+  [string] $RunnerKey = "" # Optional. Your tenant's runner key from the Microsoft eCDN admin portal (Silent Testing > Runner keys). Either hard-code it here or pass it as an argument. Treat it as a secret; it is never written to the logs.
 )
 #############
 ### SETUP ###
 #############
 
 ### Setting up the variables and function ###
-$ScriptVersion = "2.3.9.1"
+$ScriptVersion = "2.3.10.0"
 $durationMinimum = 10
 $HeadlessRunner = -not $DirectRunner -and -not $OldHideMethod
 $logPath = "$env:TEMP\p5_log_" + $TestID + ".txt"
@@ -101,6 +102,15 @@ if ($ScenarioDuration -lt $durationMinimum) {
 if ($CustomChromiumPath -and !(Test-Path $CustomChromiumPath)) {
   Out-Log "ERROR: Invalid Parameter: Custom Chromium Path '$CustomChromiumPath'. Please provide a valid path to the Chromium executable."
   Exit 1
+}
+$RunnerKey = $RunnerKey -replace '\s', ''
+if ($RunnerKey) {
+  if ($RunnerKey -notmatch '^[A-Za-z0-9._-]+$') {
+    Out-Log "ERROR: Invalid Parameter: Runner Key. Please copy it again from the Microsoft eCDN admin portal."
+    Exit 1
+  }
+  # The key goes in the URL fragment, which the browser never sends to a server.
+  $pageURL += "#rk=" + $RunnerKey
 }
 
 ### Checking if the script is already running on this machine with the same TestID ###

@@ -26,6 +26,7 @@ Set these values:
 - __$TenantID__ — your Microsoft tenant ID (required)
 - __$UEM\_Compatible\_Mode__ — set to __$true__ (required for Intune)
 - __$ScenarioDuration__ — runner time-to-live in seconds (default: 85,500 / ~23.75 hours)
+- __$RunnerKey__ — optional; your tenant's runner key from the Microsoft eCDN admin portal (__Silent Testing__ > __Runner keys__). Treat it as a secret.
 
 See [silent testing framework documentation](https://learn.microsoft.com/ecdn/technical-documentation/silent-testing-framework#run-instructions-for-windows-environment) for more information on these parameters.
 

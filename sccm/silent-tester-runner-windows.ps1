@@ -15,11 +15,12 @@ param (
     [Alias ("ShowRunner","DontHideRunner")]
     [switch] $DirectRunner, # Use if you want to run the Chromium process in a visible window. This is useful for debugging purposes.
     [string] $AdapterId, # Use if you want to specify the adapter ID. Default is PowerShell, or Direct if -DirectRunner switch is used.
-    [Alias ("ReturnRunner")]
+    [Alias ("ReturnRunner", "R")]
     [switch] $PassThru, # Returns the process object of the Chromium process.
     [Alias ("Headless")]
     [switch] $NewHideMethod, # Unused. TODO: Consider deprecating parameter.
-    [switch] $OldHideMethod
+    [switch] $OldHideMethod,
+    [string] $RunnerKey = "" # Optional. Your tenant's runner key from the Microsoft eCDN admin portal (Silent Testing > Runner keys). Either hard-code it here or pass it as an argument. Treat it as a secret; it is never written to the logs.
 )
 #############
 ### SETUP ###
@@ -78,6 +79,15 @@ if ($CustomChromiumPath -and !(Test-Path $CustomChromiumPath)) {
 if ($NewHideMethod -and $OldHideMethod) {
     Write-Error "-NewHideMethod and -OldHideMethod cannot be used together. Please choose one or neither."
     Exit 1
+}
+$RunnerKey = $RunnerKey -replace '\s', ''
+if ($RunnerKey) {
+    if ($RunnerKey -notmatch '^[A-Za-z0-9._-]+$') {
+        Write-Error "Invalid Parameter: Runner Key. Please copy it again from the Microsoft eCDN admin portal."
+        Exit 1
+    }
+    # The key goes in the URL fragment, which the browser never sends to a server.
+    $pageURL += "#rk=" + $RunnerKey
 }
 if ($NewHideMethod) {
     Write-Warning "The -NewHideMethod switch has been depracated. The --headless hide method is now the default method. To use the old hide method, use the -OldHideMethod switch."
